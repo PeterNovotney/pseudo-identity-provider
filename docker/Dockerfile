@@ -65,7 +65,7 @@ RUN chmod +x /docker-entrypoint.sh
 
 # Set default environment variables
 ENV LOG_USERNAME=admin
-ENV LOG_PASSWORD=$2a$10$s/jpYKi4n7NnKbpw/JKIX.GSVVId3lla6FbbnkECAMUnVh1azvnYm
+ENV LOG_PASSWORD=$$2a$$10$$FySeNH6jNxiGhHh/jgNP1.9PBgy3kOGgCiawrUCq1F.GYS4cosv8y
 ENV PORT=8080
 
 # Load config file by default

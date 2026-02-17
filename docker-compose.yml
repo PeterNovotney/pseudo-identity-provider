@@ -11,7 +11,7 @@ services:
       - LOG_USERNAME=${LOG_USERNAME:-admin}
       # Default password is 'test' - Generate new hash with: cd src/hash && go run hash_salt.go
       # Note: Use single $ in .env file, double $$ in docker-compose.yml
-      - LOG_PASSWORD=${LOG_PASSWORD:-$2a$10$s/jpYKi4n7NnKbpw/JKIX.GSVVId3lla6FbbnkECAMUnVh1azvnYm}
+      - LOG_PASSWORD=${LOG_PASSWORD:-$$2a$$10$$FySeNH6jNxiGhHh/jgNP1.9PBgy3kOGgCiawrUCq1F.GYS4cosv8y}
       # Uncomment to load configuration from file
       # - CONFIG_FILE=/app/config/config.json
     volumes:
