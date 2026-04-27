@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go121
-service: oidcservice
+runtime: go126
+service: pseudoidp
 app_engine_apis: true
 
 # Everything is in-memory so we use just one instance.
@@ -28,5 +28,5 @@ handlers:
   script: auto
 
 env_variables:
-  LOG_USERNAME:
-  LOG_PASSWORD:
+  LOG_USERNAME: test
+  LOG_PASSWORD: $2a$10$DF59YurAm5wYMJ/xkN00IOhKcSqM94E06Wz.hPOoDTSjiVwQfBWSi
