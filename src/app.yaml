@@ -28,5 +28,5 @@ handlers:
   script: auto
 
 env_variables:
-  LOG_USERNAME: test
-  LOG_PASSWORD: $2a$10$DF59YurAm5wYMJ/xkN00IOhKcSqM94E06Wz.hPOoDTSjiVwQfBWSi
+  LOG_USERNAME:
+  LOG_PASSWORD:
