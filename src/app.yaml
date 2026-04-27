@@ -13,7 +13,7 @@
 # limitations under the License.
 
 runtime: go126
-service: pseudoidp
+service: oidcservice
 app_engine_apis: true
 
 # Everything is in-memory so we use just one instance.
