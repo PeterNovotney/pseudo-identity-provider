@@ -20,11 +20,11 @@
     "@angular/platform-browser": "^21.2.10",
     "@angular/platform-browser-dynamic": "^21.2.10",
     "@angular/router": "^21.2.10",
+    "@ngx-formly/core": "^6.0.0",
+    "@ngx-formly/material": "^6.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0",
-    "@ngx-formly/core": "^6.0.0",
-    "@ngx-formly/material": "^6.0.0"
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
     "@angular/build": "^21.2.8",
@@ -32,7 +32,9 @@
     "@angular/compiler-cli": "^21.2.10",
     "@ngx-formly/schematics": "^6.2.2",
     "@types/jasmine": "~5.1.0",
+    "@types/json-schema": "^7.0.15",
     "jasmine-core": "~5.1.0",
+    "json-schema": "^0.4.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
