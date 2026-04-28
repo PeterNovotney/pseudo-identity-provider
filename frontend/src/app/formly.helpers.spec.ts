@@ -27,12 +27,14 @@ import {Component} from '@angular/core';
 @Component({
     selector: 'formly-array-type',
     template: `
-    <div *ngFor="let field of field.fieldGroup; let i = index">
-      <formly-group [field]="field"></formly-group>
-      <button [id]="'remove-' + i" type="button" (click)="remove(i)">Remove</button>
-    </div>
+    @for (field of field.fieldGroup; track field; let i = $index) {
+      <div>
+        <formly-group [field]="field"></formly-group>
+        <button [id]="'remove-' + i" type="button" (click)="remove(i)">Remove</button>
+      </div>
+    }
     <button id="add" type="button" (click)="add()">Add</button>
-  `,
+    `,
     standalone: false
 })
 class ArrayTypeComponent extends FieldArrayType {}
