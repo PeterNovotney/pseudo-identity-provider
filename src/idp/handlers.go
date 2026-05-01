@@ -38,5 +38,6 @@ func InitHandlers(staticTemplates *template.Template, staticDir string) error {
 	http.HandleFunc("/oauth2/auth", respLogHandler(authHandler))
 	http.HandleFunc("/oauth2/token", respLogHandler(tokenHandler))
 	http.HandleFunc("/oauth2/userinfo", respLogHandler(userInfoHandler))
+	http.HandleFunc("/callback/{path...}", respLogHandler(callbackHandler))
 	return nil
 }

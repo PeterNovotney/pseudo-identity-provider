@@ -26,6 +26,9 @@ type Config struct {
 
 	// Custom Parameter Config Entries.
 	IDTokenConfig IDTokenConfig `json:"id_token_config" jsonschema:"title=ID Token Config"`
+
+	// Custom Callback Handler. This isn't a normal part of an Idp, but can be useful for testing.
+	CallbackAction CallbackAction `json:"callback_action" jsonschema:"title=Callback Endpoint Configuration"`
 }
 
 // AuthAction configures the authz endpoint.
@@ -72,7 +75,7 @@ type TokenAction struct {
 	Action  string       `json:"action_type" jsonschema:"title=Token Endpoint Action,enum=respond,enum=error,enum=block"`
 	Respond TokenRespond `json:"respond" jsonschema:"title=Response Config" jsonschema_extras:"hide=action_type !== respond"`
 	// TODO Implement Forward TokenForward  `json:"forward"`
-	Error Error `json:"error" jsonschema:"title=Error Config" jsonschema_extras:"hide=action_type !== 'error'"`
+	Error Error `json:"error" jsonschema:"title=Error Config" jsonschema_extras:"hide=action_type !== error"`
 	// Block doesn't have any parameters.
 }
 
@@ -120,6 +123,40 @@ type UserInfoAction struct {
 // UserInfoRespond configures the Userinfo endpoint response of JSON content.
 type UserInfoRespond struct {
 	Parameters []Parameter `json:"parameters" jsonschema:"title=Parameters"`
+}
+
+// CallbackAction configures the Callback endpoint.
+type CallbackAction struct {
+	Action   string           `json:"action_type" jsonschema:"title=Callback Endpoint Action,enum=respond,enum=redirect,enum=error,enum=block,default=respond"`
+	Respond  CallbackRespond  `json:"respond" jsonschema:"title=Response Config" jsonschema_extras:"hide=action_type !== respond"`
+	Redirect CallbackRedirect `json:"redirect" jsonschema:"title=Response Config" jsonschema_extras:"hide=action_type !== redirect"`
+	Error    Error            `json:"error" jsonschema:"title=Error Config" jsonschema_extras:"hide=action_type !== error"`
+	// Block doesn't have any parameters.
+}
+
+// CallbackRespond responds and logs a request.
+type CallbackRespond struct {
+	Body    Body     `json:"body" jsonschema:"title=Body Content"`
+	Headers []Header `json:"headers" jsonschema:"title=Headers"`
+}
+
+// Body configures the body of the HTTP response. It is a simplified version of a Parameter that supports
+// seting a string value or a Custom processor value. Set an appropriate content-type headers if needed.
+type Body struct {
+	Action    string `json:"action" jsonschema:"title=Body Action,enum=set,enum=custom,default=set"`
+	Value     string `json:"value" jsonschema:"title=Value,default=example_value" jsonschema_extras:"hide=action !== set"`
+	CustomKey string `json:"custom_key" jsonschema:"title=Custom Processor Key,default=test" jsonschema_extras:"hide=action !== custom"`
+}
+
+// Header holds a HTTP header to add to the reponse
+type Header struct {
+	Key   string `json:"key" jsonschema:"title=Key"`
+	Value string `json:"value" jsonschema:"title=Value"`
+}
+
+// CallbackRedirect redirects to a target URL.
+type CallbackRedirect struct {
+	Target string `json:"target" jsonschema:"title=Target URL"`
 }
 
 // DefaultConfig is the config present on first startup. It acts as a default OIDC IDP using
