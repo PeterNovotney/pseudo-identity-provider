@@ -864,7 +864,7 @@ You can run the backend Go tests as
 
 ```
 cd ./src
-go test ./ ...
+go test ./...
 ```
 
 ### Local frontend development
