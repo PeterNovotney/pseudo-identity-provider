@@ -19,16 +19,16 @@ import "sync"
 
 // Config represents the overall configuration.
 type Config struct {
-	AuthAction      AuthAction      `json:"auth_action" jsonschema:"title=Authorization Endpoint Configuration"`
-	TokenAction     TokenAction     `json:"token_action" jsonschema:"title=Token Endpoint Configuration"`
-	UserInfoAction  UserInfoAction  `json:"userinfo_action" jsonschema:"title=UserInfo Endpoint Configuration"`
-	DiscoveryAction DiscoveryAction `json:"discovery_action" jsonschema:"title=Discovery Endpoint Configuration"`
+	AuthAction      AuthAction      `json:"auth_action" jsonschema:"title=Authorization Endpoint"`
+	TokenAction     TokenAction     `json:"token_action" jsonschema:"title=Token Endpoint"`
+	UserInfoAction  UserInfoAction  `json:"userinfo_action" jsonschema:"title=UserInfo Endpoint"`
+	DiscoveryAction DiscoveryAction `json:"discovery_action" jsonschema:"title=Discovery Endpoint"`
 
 	// Custom Parameter Config Entries.
-	IDTokenConfig IDTokenConfig `json:"id_token_config" jsonschema:"title=ID Token Config"`
+	IDTokenConfig IDTokenConfig `json:"id_token_config" jsonschema:"title=ID Token"`
 
 	// Custom Callback Handler. This isn't a normal part of an Idp, but can be useful for testing.
-	CallbackAction CallbackAction `json:"callback_action" jsonschema:"title=Callback Endpoint Configuration"`
+	CallbackAction CallbackAction `json:"callback_action" jsonschema:"title=Callback Endpoint"`
 }
 
 // AuthAction configures the authz endpoint.
