@@ -13,6 +13,13 @@ by configuring the Pseudo IdP to misbehave. You can return invalid token
 signatures, incorrect or missing CSRF token state and nonces, or test for more
 complicated Mix-Up attacks for clients that support multiple IdPs.
 
+## What's New!
+
+### 2026-05-01
+
+Added a Callback Endpoint for testing arbitrary redirects back to the server.
+Useful for testing Authorization code leaks as an example. 
+
 ## Initial Setup
 
 ### Build the Angular Frontend
@@ -401,7 +408,7 @@ located.
 * **Endpoint Action** - Determines how the /.well-known/openid-configuration
     endpoint behaves.
 
-  * `redirect` returns a successful discovery response with parameters based
+  * `respond` returns a successful discovery response with parameters based
         on the configuration.
   * `error` returns a specified HTTP error code.
   * `block` sleeps on receiving the request causing it to time out.
@@ -468,6 +475,31 @@ Endpoint configuration to set the `id_token` parameter.
             `true` or `false`.
     * `object` the value is interpreted as a JSON object. The value must
             be JSON formatted text.
+
+### Callback Endpoint Config
+
+The Callback endpoint can handle and log arbitrary requests outside of the normal
+OAuth flow. The Callback endpoint is at `/callback` and accepts any subpath.
+
+* **Callback Endpoint Action** - Determines how callback handler behaves.
+
+  * `respond` responds to HTTP requests with content of you choosing.
+  * `redirect` redirects to a URL of your choosing.
+  * `error` returns a specified HTTP error code.
+  * `block` sleeps on receiving the request causing it to time out.
+
+* **Response Config**
+
+  * **Body Content** - The string body content of the response.
+    * **Parameter Action** - How the output parameter value is determined.
+      * `set` sets the output parameter to a configured value. Set
+                supports [templated parameters](#templated_parameters) that can
+                access various server and request properties.
+      * `custom` uses a [custom processor](#adding-custom-parameters) to
+                evaluate the parameter.
+    * **Headers** - HTTP Header values to set on the response.
+      * `key` is the HTTP Header name, for example, Content-Type.
+      * `value` the value of the header.
 
 ### Templated Parameters
 
