@@ -228,6 +228,16 @@ var DefaultConfig = Config{
 		RemoveSignature: false,
 		UseWrongKey:     false,
 	},
+	CallbackAction: CallbackAction{
+		Action: "respond",
+		Respond: CallbackRespond{
+			Body: Body{
+				Action: "set",
+				Value:  "",
+			},
+			Headers: []Header{},
+		},
+	},
 }
 
 // Config storage.

@@ -45,16 +45,21 @@ type Entry struct {
 
 // RequestEntry log an incoming Request and its response.
 type RequestEntry struct {
-	time   time.Time
-	input  *sessionmgmt.RequestInput
-	action string
-	resp   *ResponseEntry
+	Time   time.Time
+	Input  *sessionmgmt.RequestInput
+	Action string
+	Resp   *ResponseEntry
 }
 
 // ResponseEntry stores the response data.
 type ResponseEntry struct {
-	headers http.Header
-	body    string
+	Headers http.Header
+	Body    string
+}
+
+// ListLogsResponse contains a list of request logs.
+type ListLogsResponse struct {
+	Entries []RequestEntry
 }
 
 // Global mutex protected storage for the Request Log.
@@ -64,6 +69,32 @@ var logMutex sync.Mutex
 // init sets up the request log.
 func init() {
 	requestLog = make(map[string]RequestEntry)
+}
+
+// ListLogs return a list of logged requests.
+func ListLogs() ListLogsResponse {
+	logMutex.Lock()
+	defer logMutex.Unlock()
+
+	entries := ListLogsResponse{}
+	entries.Entries = []RequestEntry{}
+	for _, entry := range requestLog {
+		entries.Entries = append(entries.Entries, entry)
+	}
+	return entries
+}
+
+// AddRequestLogEntry allows directly adding an entry.
+func AddRequestLogEntry(e RequestEntry) error {
+	logMutex.Lock()
+	defer logMutex.Unlock()
+
+	id, err := generateBase64ID(32)
+	if err != nil {
+		return err
+	}
+	requestLog[id] = e
+	return nil
 }
 
 // String renders an entry structure to the JSON format expected by Cloud Logging.
@@ -81,7 +112,7 @@ func (e Entry) String() string {
 // logHandler writes out the request logs. This is protected by authorization since
 // the request logs can have codes and tokens.
 func logHandler(w http.ResponseWriter, r *http.Request) {
-	if !checkAuth(w, r) {
+	if !CheckAuth(w, r) {
 		return
 	}
 	writeRequestLog(w)
@@ -119,7 +150,7 @@ func addRequestLogEntry(input *sessionmgmt.RequestInput, action string) {
 	traceHeader := input.Headers.Get("X-Cloud-Trace-Context")
 	time := time.Now()
 	logMutex.Lock()
-	requestLog[traceHeader] = RequestEntry{time: time, input: input, action: action}
+	requestLog[traceHeader] = RequestEntry{Time: time, Input: input, Action: action}
 	logMutex.Unlock()
 }
 
@@ -154,9 +185,9 @@ func respLogHandler(fn http.HandlerFunc) http.HandlerFunc {
 		logMutex.Lock()
 		req, ok := requestLog[traceHeader]
 		if !ok {
-			requestLog[traceHeader] = RequestEntry{resp: getResponseEntry(rec.Result())}
+			requestLog[traceHeader] = RequestEntry{Resp: getResponseEntry(rec.Result())}
 		} else {
-			req.resp = getResponseEntry(rec.Result())
+			req.Resp = getResponseEntry(rec.Result())
 			requestLog[traceHeader] = req
 		}
 		logMutex.Unlock()
@@ -183,8 +214,8 @@ func getResponseEntry(resp *http.Response) *ResponseEntry {
 	}
 
 	return &ResponseEntry{
-		headers: resp.Header,
-		body:    newStr,
+		Headers: resp.Header,
+		Body:    newStr,
 	}
 }
 
@@ -207,7 +238,7 @@ func writeRequestLog(w http.ResponseWriter) {
 	}
 
 	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].time.Before(entries[j].time)
+		return entries[i].Time.Before(entries[j].Time)
 	})
 
 	fmt.Fprint(w, "<html><head><link rel='stylesheet' href='log.css'></head>")
@@ -217,30 +248,30 @@ func writeRequestLog(w http.ResponseWriter) {
 		req := entries[i]
 		fmt.Fprint(w, "<table>")
 		writeRow(w, "Id:", fmt.Sprint(i))
-		writeRow(w, "Time:", req.time.Local().Format(time.ANSIC))
-		writeRow(w, "Path:", req.input.Path)
-		writeRow(w, "Method:", req.input.HTTPMethod)
-		writeRow(w, "Proto:", req.input.Proto)
-		writeRow(w, "Action Taken:", req.action)
-		writeParams(w, req.input)
+		writeRow(w, "Time:", req.Time.Local().Format(time.ANSIC))
+		writeRow(w, "Path:", req.Input.Path)
+		writeRow(w, "Method:", req.Input.HTTPMethod)
+		writeRow(w, "Proto:", req.Input.Proto)
+		writeRow(w, "Action Taken:", req.Action)
+		writeParams(w, req.Input)
 
-		if req.input.Session != nil {
-			writeRow(w, "Session Code:", req.input.Session.Code)
-			writeRow(w, "Session ClientID:", req.input.Session.ClientID)
-			writeRow(w, "Session RedirectURI:", req.input.Session.RedirectURI)
-			writeRow(w, "Session Nonce:", req.input.Session.Nonce)
-			writeRow(w, "Session Challenge:", req.input.Session.CodeChallenge)
-			writeRow(w, "Session Challenge Method:", req.input.Session.CodeChallengeMethod)
+		if req.Input.Session != nil {
+			writeRow(w, "Session Code:", req.Input.Session.Code)
+			writeRow(w, "Session ClientID:", req.Input.Session.ClientID)
+			writeRow(w, "Session RedirectURI:", req.Input.Session.RedirectURI)
+			writeRow(w, "Session Nonce:", req.Input.Session.Nonce)
+			writeRow(w, "Session Challenge:", req.Input.Session.CodeChallenge)
+			writeRow(w, "Session Challenge Method:", req.Input.Session.CodeChallengeMethod)
 		}
 
-		if req.resp != nil {
+		if req.Resp != nil {
 			writeRow(w, "Response:")
 			writeRow(w, "Headers:")
-			for k, v := range req.resp.headers {
+			for k, v := range req.Resp.Headers {
 				writeRow(w, append([]string{"", k}, v...)...)
 			}
 
-			writeWideRow(w, "Body:", req.resp.body)
+			writeWideRow(w, "Body:", req.Resp.Body)
 		}
 
 		fmt.Fprint(w, "</table>")

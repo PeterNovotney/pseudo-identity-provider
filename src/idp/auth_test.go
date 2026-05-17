@@ -34,8 +34,8 @@ func setupCreds(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	os.Setenv(userNameVar, testDefaultUsername)
-	os.Setenv(pwdHashVar, string(expectedPwdhash))
+	os.Setenv(UserNameVar, testDefaultUsername)
+	os.Setenv(PwdHashVar, string(expectedPwdhash))
 }
 
 func TestCheckAuth(t *testing.T) {
@@ -77,7 +77,7 @@ func TestCheckAuth(t *testing.T) {
 
 		w := httptest.NewRecorder()
 
-		got := checkAuth(w, r)
+		got := CheckAuth(w, r)
 		if got != tc.want {
 			t.Errorf("expected %t, got %t", tc.want, got)
 		}

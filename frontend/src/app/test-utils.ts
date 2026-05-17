@@ -31,6 +31,7 @@ export
 @Injectable()
 class FakeConfigService {
   storedConfig = defaultConfig;
+  mcpStatus = false;
   getConfig(): Observable<string> {
     return of(JSON.parse(this.storedConfig));
   }
@@ -54,6 +55,15 @@ class FakeConfigService {
 
   getCachedSchema() {
     return JSON.parse(this.storedConfig);
+  }
+
+  getMcpStatus() {
+    return of(this.mcpStatus);
+  }
+
+  setMcpStatus(enable: boolean) {
+    this.mcpStatus = enable;
+    return of(null);
   }
 
   resetConfig() {

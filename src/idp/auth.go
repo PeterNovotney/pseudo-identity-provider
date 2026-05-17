@@ -24,16 +24,18 @@ import (
 	"golang.org/x/time/rate"
 )
 
+const (
+	UserNameVar = "LOG_USERNAME"
+	PwdHashVar  = "LOG_PASSWORD"
+)
+
 var (
-	userNameVar = "LOG_USERNAME"
-	pwdHashVar  = "LOG_PASSWORD"
 	limiter = rate.NewLimiter(rate.Every(time.Minute/10), 10)
 )
 
-func checkAuth(w http.ResponseWriter, r *http.Request) bool {
-	expectedUsername := os.Getenv(userNameVar)
-	expectedPasswordHash := os.Getenv(pwdHashVar)
-
+func CheckAuth(w http.ResponseWriter, r *http.Request) bool {
+	expectedUsername := os.Getenv(UserNameVar)
+	expectedPasswordHash := os.Getenv(PwdHashVar)
 	// Consider auth turned off if both the expected username and password are not configured.
 	if expectedUsername == "" && expectedPasswordHash == "" {
 		return true
@@ -47,9 +49,11 @@ func checkAuth(w http.ResponseWriter, r *http.Request) bool {
 	}
 
 	res := limiter.Reserve()
-	if !res.OK() || res.Delay() > (0 * time.Second) {
+	if !res.OK() || res.Delay() > (10*time.Second) {
 		http.Error(w, "Too many failures, please wait", http.StatusUnauthorized)
 		return false
+	} else if res.Delay() > (0 * time.Second) {
+		time.Sleep(res.Delay())
 	}
 
 	if subtle.ConstantTimeCompare([]byte(u), []byte(expectedUsername)) != 1 {

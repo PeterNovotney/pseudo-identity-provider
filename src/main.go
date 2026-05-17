@@ -21,6 +21,7 @@ import (
 	"os"
 
 	idp "customidp/idp"
+	"customidp/mcp"
 
 	"google.golang.org/appengine/v2"
 )
@@ -31,6 +32,7 @@ var templates = template.Must(template.ParseGlob("static/browser/*.html"))
 // Main setups handlers and starts the service for AppEngine hosting.
 func main() {
 	idp.InitHandlers(templates, "static/browser")
+	mcp.InitMcpServer()
 
 	port := os.Getenv("PORT")
 	if port == "" {

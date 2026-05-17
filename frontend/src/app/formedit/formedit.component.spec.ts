@@ -102,4 +102,17 @@ describe('FormEditComponent', () => {
       });
     });
   }));
+
+  it('sets MCP server status', waitForAsync(() => {
+    fixture.nativeElement.querySelector('#mcpserver_status').click();
+    fixture.detectChanges();
+    fixture.whenStable().then(() => {
+      expect(component.mcpEnabled).toEqual(true);
+      fixture.nativeElement.querySelector('#mcpserver_status').click();
+      fixture.detectChanges();
+      fixture.whenStable().then(() => {
+        expect(component.mcpEnabled).toEqual(false);
+      });
+    });
+  }));
 });

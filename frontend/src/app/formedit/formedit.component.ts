@@ -35,12 +35,14 @@ export class FormeditComponent {
   fields: FormlyFieldConfig[] = [];
   schema: any = '';
   config: any = '';
+  mcpEnabled: boolean = false;
 
   constructor(
     private formlyJsonschema: FormlyJsonschema,
     private configService: ConfigService,
   ) {
     this.loadExample();
+    this.loadMcpStatus();
   }
 
   loadExample() {
@@ -54,6 +56,12 @@ export class FormeditComponent {
     this.configService.getConfig().subscribe({
       next: (resp: any) => (this.config = resp),
       complete: () => this.createForm(),
+    });
+  }
+
+  loadMcpStatus() {
+    this.configService.getMcpStatus().subscribe({
+      next: (enabled: any) => (this.mcpEnabled = enabled),
     });
   }
 
@@ -82,6 +90,12 @@ export class FormeditComponent {
     this.configService.resetConfig().subscribe({
       next: (resp: any) => (this.config = resp),
       complete: () => this.createForm(),
+    });
+  }
+
+  onMcpUpdate() {
+    this.configService.setMcpStatus(!this.mcpEnabled).subscribe({
+      complete: () => {this.mcpEnabled = !this.mcpEnabled},
     });
   }
 }
