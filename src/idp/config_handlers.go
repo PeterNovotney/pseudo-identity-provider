@@ -19,52 +19,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/invopop/jsonschema"
 )
-
-// checkCSRF checks for CSRF protections.
-func checkCSRF(r *http.Request) error {
-	// Custom header defense.
-	if r.Header.Get("X-Pseudo-IDP-CSRF-Protection") != "1" {
-		return fmt.Errorf("invalid Request")
-	}
-
-	// Ensure a correct content type. Don't allow form-data or test/plain.
-	if r.Header.Get("Content-Type") != "application/json" {
-		return fmt.Errorf("invalid Request")
-	}
-
-	// As a defense in depth, validate the Origin.
-	host := r.Host
-	if host == "" {
-		return fmt.Errorf("invalid Request")
-	}
-
-	originURL, err := url.ParseRequestURI(r.Header.Get("Origin"))
-	if err != nil {
-		return fmt.Errorf("invalid Request")
-	}
-
-	if host != originURL.Host {
-		return fmt.Errorf("invalid Request")
-	}
-
-	return nil
-}
 
 // configHandler gets or updates the instance configuration.
 // Authorization is required for modifying the configuration.
 // A POST request with no Body resets the configuration to the default.
 func configHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		if err := checkCSRF(r); err != nil {
+		if err := CheckCSRF(r); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if !checkAuth(w, r) {
+		if !CheckAuth(w, r) {
 			return
 		}
 
@@ -80,12 +49,12 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		config.SetGlobalConfig(&newConfig)
 	} else if r.Method == "DELETE" {
-		if err := checkCSRF(r); err != nil {
+		if err := CheckCSRF(r); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if !checkAuth(w, r) {
+		if !CheckAuth(w, r) {
 			return
 		}
 

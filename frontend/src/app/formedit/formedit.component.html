@@ -25,6 +25,10 @@
 
 <a mat-raised-button color="primary" href="log">Request Logs</a>
 
+<button id="mcpserver_status" color="primary" [color]="mcpEnabled ? 'primary' : 'accent'" mat-raised-button (click)="onMcpUpdate()">
+  {{ mcpEnabled ? 'Turn Off MCP Server' : 'Turn On MCP Server' }}
+</button>
+
 <button id="formedit_reset" color="warn" mat-raised-button (click)="onReset()">
   Reset to Defaults
 </button>

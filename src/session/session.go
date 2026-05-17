@@ -26,52 +26,52 @@ import (
 // Session State tracking.
 type Session struct {
 	// OAuth code value from Authorization Endpoint.
-	Code                string
+	Code string
 
 	// Nonce value from client if provided.
-	Nonce               string
+	Nonce string
 
 	// PKCE code challenge value if provided.
-	CodeChallenge       string
+	CodeChallenge string
 
 	// PKCE code challenge method if provided.
 	CodeChallengeMethod string
 
 	// OAuth Client ID.
-	ClientID            string
+	ClientID string
 
 	// The client's redirect URI specified at the Authorization Endpoint.
-	RedirectURI         string
+	RedirectURI string
 }
 
 // RequestInput tracks request state and can be use in Parameter evaluation templates.
 type RequestInput struct {
 	// Domain name of the IdP Server.
-	Domain     string
+	Domain string
 
 	// The HTTP Method Used by the caller. GET, POST, etc.
 	HTTPMethod string
 
 	// The URL Path used in the call.
-	Path       string
+	Path string
 
 	// HTTPS if the call is over TLS, HTTP otherwise.
-	Proto      string
+	Proto string
 
 	// HTTP Header values.
-	Headers    http.Header
+	Headers http.Header
 
 	// URL Query parameter values. Can be indexed like a Map.
-	URLParams  url.Values
+	URLParams url.Values
 
 	// POST form parameters if any. Can be indexed like a Map.
 	FormParams url.Values
 
 	// The session structure for Token endpoint calls if any is found.
-	Session    *Session
+	Session *Session
 
 	// Call timestamp.
-	Time       time.Time
+	Time time.Time
 }
 
 // Global map for tracking sessions.

@@ -26,6 +26,7 @@ import (
 
 	"customidp/config"
 	idp "customidp/idp"
+	"customidp/mcp"
 )
 
 // Static HTML file templates.
@@ -101,6 +102,7 @@ func watchConfigFile(configPath string) {
 // Main setups handlers and starts the service for AppEngine hosting.
 func main() {
 	idp.InitHandlers(templates, "../src/static/browser")
+	mcp.InitMcpServer()
 
 	// Load configuration from file if specified
 	configPath := os.Getenv("CONFIG_FILE")

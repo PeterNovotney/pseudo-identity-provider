@@ -17,7 +17,7 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable, throwError} from 'rxjs';
-import {catchError, retry, tap} from 'rxjs/operators';
+import {catchError, map, retry, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +25,7 @@ import {catchError, retry, tap} from 'rxjs/operators';
 export class ConfigService {
   configEndpoint = '/config';
   configSchemaEndpoint = '/configschema';
+  mcpServerStatusEndpoint = '/mcpstatus';
   schema: any = '';
 
   constructor(private http: HttpClient) {}
@@ -74,6 +75,37 @@ export class ConfigService {
 
     return this.http
       .delete(this.configEndpoint, httpOptions)
+      .pipe(catchError(this.handleError));
+  }
+
+  getMcpStatus() {
+    const pipe = this.http.get<any>(this.mcpServerStatusEndpoint).pipe(
+      retry(3),
+      catchError(this.handleError),
+      map((status) => status.enabled),
+    );
+    return pipe;
+  }
+
+  setMcpStatus(enable: boolean) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        // CSRF defense with Custom Request headers.
+        'X-Pseudo-IDP-CSRF-Protection': '1',
+      }),
+    };
+
+    interface MCPServerStatus {
+      enabled: boolean,
+    }
+
+    const status: MCPServerStatus = {
+      enabled: enable,
+    }
+
+    return this.http
+      .post(this.mcpServerStatusEndpoint, status, httpOptions)
       .pipe(catchError(this.handleError));
   }
 
