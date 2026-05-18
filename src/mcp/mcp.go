@@ -32,7 +32,15 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// PSEUDO_IDP_ENABLE_MCP environment variable allows you to set the MCP server
+// on by default if set to 'true'.
 const MCPServerEnabledVar = "PSEUDO_IDP_ENABLE_MCP"
+
+// PSEUDO_IDP_DISABLE_LOCALHOST_CHECK allows you to disable the MCP SDK
+// Localhost origin check for cases where the server is behind a local
+// proxy if set toe 'true'. See https://github.com/modelcontextprotocol/go-sdk/pull/760
+// for more information.
+const DisableLocalhostOriginCheck = "PSEUDO_IDP_DISABLE_LOCALHOST_CHECK"
 
 // MCPStatusMessage hold the message to update the MCPServerEnabled status.
 type MCPStatusMessage struct {
@@ -131,11 +139,13 @@ func initMcpHandler() (func(http.ResponseWriter, *http.Request), error) {
 	// Localhost DNS rebinding protections are disabled for AppEngine hosted
 	// as there is a local reverse proxy. If you are using Pseudo IdP behind
 	// a reverse proxy in another configuration, you may need to force this
-	// value to true as well. See https://github.com/modelcontextprotocol/go-sdk/pull/760
+	// value to true as well. Set PSEUDO_IDP_DISABLE_LOCALHOST_CHECK
+	// environment variable to TRUE to manually disable this check.
+	// See https://github.com/modelcontextprotocol/go-sdk/pull/760
 	// for more information.
 	handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 		return server
-	}, &mcp.StreamableHTTPOptions{DisableLocalhostProtection: isAppEngine()})
+	}, &mcp.StreamableHTTPOptions{DisableLocalhostProtection: disableLocalhostOriginCheck()})
 
 	// Secure wrapper to handle Basic Auth challenge and validation
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -150,10 +160,11 @@ func initMcpHandler() (func(http.ResponseWriter, *http.Request), error) {
 	}), nil
 }
 
-// isAppEngine check if we are running on AppEngine.
-func isAppEngine() bool {
-	// GAE_ENV is set to "standard" in the GAE Standard environment
-	return os.Getenv("GAE_ENV") != ""
+// disableLocalhostOriginCheck checks if we are running on AppEngine.
+// or is the PSEUDO_IDP_DISABLE_LOCALHOST_CHECK flag is set.
+func disableLocalhostOriginCheck() bool {
+	return (os.Getenv("GAE_ENV") != "") ||
+		(strings.ToLower(os.Getenv(DisableLocalhostOriginCheck)) == "true")
 }
 
 // initializeNilSlices fills in any Nil array slices, which the MCP Server's
