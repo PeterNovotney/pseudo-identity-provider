@@ -20,6 +20,10 @@ complicated Mix-Up attacks for clients that support multiple IdPs.
 Added a Callback Endpoint for testing arbitrary redirects back to the server.
 Useful for testing Authorization code leaks as an example. 
 
+### 2026-02-10
+
+Docker Container support. Thanks to dafenix!
+
 ## Initial Setup
 
 ### Build the Angular Frontend
