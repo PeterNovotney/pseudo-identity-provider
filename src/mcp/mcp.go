@@ -58,8 +58,9 @@ func ListLogs(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallT
 
 // GetConfig returns the current config.
 func GetConfig(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
-	initializeNilSlices(config.GetGlobalConfig())
-	return nil, *config.GetGlobalConfig(), nil
+	config := config.GetGlobalConfig()
+	initializeNilSlices(config)
+	return nil, *config, nil
 }
 
 // SetConfig updates the server configuration.
@@ -165,21 +166,22 @@ func initializeNilSlices(i interface{}) {
 		return
 	}
 
-	initializeRecursive(v.Elem())
+	initializeRecursive(v.Elem(), reflect.StructField{})
 }
 
 // initializeRecursive walks the structure to fill in the slices.
-func initializeRecursive(v reflect.Value) {
+func initializeRecursive(v reflect.Value, field reflect.StructField) {
 	switch v.Kind() {
 	case reflect.Ptr:
 		if v.IsNil() {
 			v.Set(reflect.New(v.Type().Elem()))
 		}
-		initializeRecursive(v.Elem())
+		initializeRecursive(v.Elem(), field)
 
 	case reflect.Struct:
+		t := v.Type()
 		for i := 0; i < v.NumField(); i++ {
-			initializeRecursive(v.Field(i))
+			initializeRecursive(v.Field(i), t.Field(i))
 		}
 
 	case reflect.Slice:
@@ -192,7 +194,7 @@ func initializeRecursive(v reflect.Value) {
 		// Even if it wasn't nil, we need to check its elements
 		// for nested structs/slices
 		for i := 0; i < v.Len(); i++ {
-			initializeRecursive(v.Index(i))
+			initializeRecursive(v.Index(i), field)
 		}
 
 	case reflect.Map:
@@ -202,9 +204,28 @@ func initializeRecursive(v reflect.Value) {
 		}
 		// Iterate through map values
 		for _, key := range v.MapKeys() {
-			initializeRecursive(v.MapIndex(key))
+			initializeRecursive(v.MapIndex(key), field)
+		}
+	case reflect.String:
+		if v.CanSet() && v.IsZero() {
+			if tagValue := field.Tag.Get("jsonschema"); tagValue != "" {
+				if defaultValue := extractDefault(tagValue); defaultValue != "" {
+					v.SetString(defaultValue)
+				}
+			}
 		}
 	}
+}
+
+// extractDefault parses "fieldName,default=X" or "fieldName,omitempty,default=X"
+func extractDefault(tag string) string {
+	parts := strings.Split(tag, ",")
+	for _, part := range parts {
+		if strings.HasPrefix(part, "default=") {
+			return strings.TrimPrefix(part, "default=")
+		}
+	}
+	return ""
 }
 
 // mcpStatusHandler updates if the MCP server is on or off.

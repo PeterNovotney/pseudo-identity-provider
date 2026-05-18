@@ -16,8 +16,10 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/term"
@@ -33,7 +35,15 @@ func main() {
 	}
 	t := term.NewTerminal(os.Stdin, "")
 
-	pass, err := t.ReadPassword("Enter a password:")
+	t.SetPrompt("Enter a username: ")
+	username, err := t.ReadLine()
+	if err != nil {
+		fmt.Errorf("failed to get password: %v", err)
+		term.Restore(fd, oldState)
+		return
+	}
+
+	pass, err := t.ReadPassword("Enter a password: ")
 	if err != nil {
 		fmt.Errorf("failed to get password: %v", err)
 		term.Restore(fd, oldState)
@@ -45,7 +55,27 @@ func main() {
 		fmt.Println(err)
 	}
 
+	hashStr := string(hash)
+	dockerEscaped := strings.ReplaceAll(hashStr, "$", "$$")
+
+	urlPart := username + ":" + pass
+	basicAuth := base64.URLEncoding.EncodeToString([]byte(urlPart))
+
 	term.Restore(fd, oldState)
 
-	fmt.Println("Hash: " + string(hash))
+	fmt.Println("\nFormat for docker-compose.yml:")
+	fmt.Println("environment:")
+	fmt.Printf("  - LOG_USERNAME=${LOG_USERNAME:-%s}\n", username)
+	fmt.Printf("  - LOG_PASSWORD=${LOG_PASSWORD:-%s}\n", dockerEscaped)
+
+	fmt.Println("\nFormat for command line or .env file:")
+	fmt.Printf("LOG_USERNAME=%s\n", username)
+	fmt.Printf("LOG_PASSWORD='%s'\n", hashStr)
+
+	fmt.Println("\nFormat for AppEngine app.yaml:")
+	fmt.Printf("LOG_USERNAME=%s\n", username)
+	fmt.Printf("LOG_PASSWORD=%s\n", hashStr)
+
+	fmt.Println("\nFormat for Auth HTTP header (MCP Clients):")
+	fmt.Printf("Authorization: Basic %s\n\n", basicAuth)
 }
