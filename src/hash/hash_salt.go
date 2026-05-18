@@ -30,7 +30,7 @@ func main() {
 	fd := int(os.Stdin.Fd())
 	oldState, err := term.MakeRaw(fd)
 	if err != nil {
-		fmt.Errorf("failed to setup terminal: %v", err)
+		fmt.Printf("failed to setup terminal: %v", err)
 		return
 	}
 	t := term.NewTerminal(os.Stdin, "")
@@ -38,14 +38,14 @@ func main() {
 	t.SetPrompt("Enter a username: ")
 	username, err := t.ReadLine()
 	if err != nil {
-		fmt.Errorf("failed to get password: %v", err)
+		fmt.Printf("failed to get password: %v", err)
 		term.Restore(fd, oldState)
 		return
 	}
 
 	pass, err := t.ReadPassword("Enter a password: ")
 	if err != nil {
-		fmt.Errorf("failed to get password: %v", err)
+		fmt.Printf("failed to get password: %v", err)
 		term.Restore(fd, oldState)
 		return
 	}
